@@ -216,7 +216,6 @@
 
           <select id="maquina" required>
             <option value="">Escolher</option>
-
             <option>TML-03</option>
             <option>TML-06</option>
             <option>TML-07</option>
@@ -457,10 +456,10 @@
   <script>
 
     // =========================================================
-    // URL DO APP DA WEB
+    // URL DO WEBHOOK DO N8N
     // =========================================================
 
-    const URL_API = "https://script.google.com/macros/s/AKfycby98mfH8bXM3EuXBSGE_WzJnBFc6ikJC3ic_gmqs-gX7NyIPfTFjPfj9zkMQwfKHL84/exec";
+    const URL_API = "https://n8n-phjm.srv1897202.hstgr.cloud/webhook-test/ae2f136a-b196-4086-8958-6038117ea9e1";
 
 
     // =========================================================
@@ -564,7 +563,7 @@
 
 
     // =========================================================
-    // ENVIA PARA O APPS SCRIPT
+    // ENVIA PARA O N8N
     // =========================================================
 
     async function enviarFormulario(dados) {
@@ -588,49 +587,18 @@
         const texto = await resposta.text();
 
         console.log(
-          "Resposta do Apps Script:",
+          "Resposta do N8N:",
           texto
         );
 
 
-        let resultado;
-
-        try {
-
-          resultado = JSON.parse(texto);
-
-        } catch (erroJSON) {
-
-          console.error(
-            "Resposta não é JSON:",
-            texto
-          );
-
-          return false;
-        }
-
-
-        if (
-          resultado &&
-          resultado.sucesso === true
-        ) {
-
-          return true;
-        }
-
-
-        console.error(
-          "Apps Script retornou erro:",
-          resultado
-        );
-
-        return false;
+        return true;
 
 
       } catch (erro) {
 
         console.error(
-          "Erro ao enviar para o Apps Script:",
+          "Erro ao enviar para o N8N:",
           erro
         );
 
@@ -714,14 +682,14 @@
 
 
             alert(
-              "Relatório enviado com sucesso para a planilha!"
+              "Relatório enviado com sucesso para o N8N!"
             );
 
 
           } else {
 
             alert(
-              "Não foi possível enviar o relatório. Verifique o Apps Script."
+              "Não foi possível enviar o relatório. Verifique o N8N."
             );
           }
 
