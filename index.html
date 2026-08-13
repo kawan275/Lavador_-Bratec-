@@ -1,530 +1,37 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BRATEC - Relatório Lavador Ternium</title>
+<script>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+const URL_API = "https://n8n-phjm.srv1897202.hstgr.cloud/webhook/ae2f136a-b196-4086-8958-6038117ea9e1";
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: #eef1f4;
-      color: #222;
-      min-height: 100vh;
-      position: relative;
-    }
+const campoData = document.getElementById("data");
 
-    body::before {
-      content: "BRATEC";
-      position: fixed;
-      left: 50%;
-      top: 55%;
-      transform: translate(-50%, -50%) rotate(-25deg);
-      font-size: 130px;
-      font-weight: 900;
-      letter-spacing: 15px;
-      color: rgba(0, 0, 0, 0.035);
-      z-index: 0;
-      pointer-events: none;
-      white-space: nowrap;
-    }
+const hoje = new Date();
+const ano = hoje.getFullYear();
+const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+const dia = String(hoje.getDate()).padStart(2, "0");
 
-    .cabecalho {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      min-height: 90px;
-      background: white;
-      border-bottom: 4px solid #0b5cab;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 30px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    }
+campoData.value = `${ano}-${mes}-${dia}`;
 
-    .titulo {
-      text-align: center;
-      flex: 1;
-    }
+function gerarRelatorio() {
 
-    .titulo h1 {
-      margin: 0;
-      font-size: 23px;
-      color: #17324d;
-    }
+  const responsavel = document.getElementById("responsavel").value;
+  const turno = document.getElementById("turno").value;
+  const dataOriginal = document.getElementById("data").value;
+  const maquina = document.getElementById("maquina").value;
+  const horimetro = document.getElementById("horimetro").value || "-";
+  const tipoLavagem = document.getElementById("tipoLavagem").value;
+  const inicio = document.getElementById("inicio").value;
+  const termino = document.getElementById("termino").value;
+  const ordem = document.getElementById("ordem").value;
+  const observacao = document.getElementById("observacao").value || "-";
 
-    .pagina {
-      position: relative;
-      z-index: 1;
-      padding: 30px 15px 50px;
-    }
+  let data = "-";
 
-    .formulario {
-      max-width: 650px;
-      margin: auto;
-      background: rgba(255, 255, 255, 0.97);
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    }
+  if (dataOriginal) {
+    const partes = dataOriginal.split("-");
+    data = `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
 
-    .campo {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 18px;
-    }
-
-    label {
-      font-weight: bold;
-      margin-bottom: 7px;
-      color: #17324d;
-    }
-
-    select,
-    input,
-    textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #b8c1ca;
-      border-radius: 7px;
-      font-size: 16px;
-      background: white;
-      outline: none;
-    }
-
-    select:focus,
-    input:focus,
-    textarea:focus {
-      border-color: #0b5cab;
-      box-shadow: 0 0 0 2px rgba(11,92,171,0.12);
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 7px;
-      background: #0b5cab;
-      color: white;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #083f76;
-    }
-
-    button:disabled {
-      opacity: 0.7;
-      cursor: wait;
-    }
-
-    .observacao-maquina {
-      margin-bottom: 8px;
-      padding: 10px;
-      background: #f1f5f9;
-      border-radius: 6px;
-      font-size: 13px;
-      color: #555;
-    }
-
-    #resultado {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f7f7f7;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      display: none;
-      font-family: Arial, sans-serif;
-    }
-
-    @media (max-width: 700px) {
-      .formulario {
-        padding: 20px;
-      }
-
-      body::before {
-        font-size: 75px;
-      }
-
-      .titulo h1 {
-        font-size: 18px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="pagina">
-
-    <div class="formulario">
-
-      <h1>BRATEC - Relatório Lavador Ternium</h1>
-
-      <form id="formLavagem">
-
-        <div class="campo">
-          <label for="responsavel">Responsável BRATEC *</label>
-          <select id="responsavel" required>
-            <option value="">Escolher</option>
-            <option>Alexandre Bello</option>
-            <option>Francisco</option>
-            <option>Júlio César</option>
-            <option>Kawan Davi</option>
-            <option>Matheus Alves</option>
-          </select>
-        </div>
-
-        <div class="campo">
-          <label for="turno">Turno *</label>
-          <select id="turno" required>
-            <option value="">Escolher</option>
-            <option>ADM</option>
-            <option>AZUL</option>
-            <option>AMARELO</option>
-            <option>VERDE</option>
-            <option>BRANCO</option>
-          </select>
-        </div>
-
-        <div class="campo">
-          <label for="data">Data *</label>
-          <input type="date" id="data" required>
-        </div>
-
-        <div class="campo">
-          <label for="maquina">Máquina *</label>
-
-          <div class="observacao-maquina">
-            Caso a máquina lavada seja terceira ou não esteja na descrição,
-            favor informar no campo observações.
-          </div>
-
-          <select id="maquina" required>
-            <option value="">Escolher</option>
-            <option>TML-03</option>
-            <option>TML-06</option>
-            <option>TML-07</option>
-            <option>TML-09</option>
-            <option>TBD-008</option>
-            <option>KYC</option>
-            <option>MPW-03</option>
-            <option>MPW-05</option>
-            <option>MPW-06</option>
-            <option>MPW-07</option>
-            <option>SPC-006</option>
-            <option>SPC-007</option>
-            <option>SPC-003</option>
-            <option>SPC-005</option>
-            <option>SPC-008</option>
-            <option>SPC-009</option>
-
-            <option>825-13</option>
-            <option>825-14</option>
-            <option>825-15</option>
-            <option>835-16</option>
-
-            <option>750-18 (ESCAVADEIRA VOLVO 18)</option>
-
-            <option>PA586-031</option>
-            <option>PA950-030</option>
-            <option>PA980-026</option>
-            <option>PA980-027</option>
-            <option>PA980-028</option>
-            <option>PA980-029</option>
-
-            <option>VOLVO-021</option>
-            <option>VOLVO-022</option>
-            <option>VOLVO-023</option>
-            <option>VOLVO-024</option>
-
-            <option>RANDON-016</option>
-            <option>RANDON-017</option>
-            <option>RANDON-018</option>
-            <option>RANDON-019</option>
-            <option>RANDON-020</option>
-
-            <option>305-008</option>
-            <option>325-002</option>
-            <option>944-009</option>
-            <option>964-004</option>
-
-            <option>336-012 (CZM 12)</option>
-
-            <option>PA580-015</option>
-            <option>PA938-021</option>
-            <option>PA938-023</option>
-            <option>PA966-024</option>
-            <option>PA988-005</option>
-            <option>PA988-017</option>
-
-            <option>TERBERG-09</option>
-            <option>TERBERG-10</option>
-            <option>TERBERG-11</option>
-
-            <option>SCANIA-042</option>
-            <option>SCANIA-043</option>
-            <option>SCANIA-044</option>
-            <option>SCANIA-045</option>
-            <option>SCANIA-046</option>
-            <option>SCANIA-047</option>
-            <option>SCANIA-048</option>
-            <option>SCANIA-049</option>
-            <option>SCANIA-050</option>
-
-            <option>VOLVO-051</option>
-            <option>VOLVO-052</option>
-            <option>VOLVO-053</option>
-            <option>VOLVO-054</option>
-            <option>VOLVO-055</option>
-            <option>VOLVO-056</option>
-            <option>VOLVO-057</option>
-            <option>VOLVO-058</option>
-            <option>VOLVO-059</option>
-            <option>VOLVO-060</option>
-
-            <option>FERRARI-024</option>
-            <option>FERRARI-025</option>
-
-            <option>KALMAR-026</option>
-            <option>KALMAR-027</option>
-            <option>KALMAR-028</option>
-            <option>KALMAR-029</option>
-            <option>KALMAR-030</option>
-            <option>KALMAR-031</option>
-            <option>KALMAR-032</option>
-
-            <option>MAFI-012</option>
-            <option>MAFI-013</option>
-
-            <option>SCANIA-022</option>
-            <option>SCANIA-039</option>
-            <option>SCANIA-040</option>
-            <option>SCANIA-041</option>
-
-            <option>KALMAR-012</option>
-            <option>KALMAR-013</option>
-
-            <option>FERRARI-017</option>
-
-            <option>TBPA 958-032</option>
-            <option>TBPA 958-033</option>
-
-            <option>MÁQUINA TERCEIRA</option>
-
-            <option>PALLET 7223 (PLFRI-031)</option>
-            <option>PALLET 7236 (PLFRI-068)</option>
-            <option>PALLET 7237 (PLFRI-069)</option>
-            <option>PALLET 7239 (PLFRI-071)</option>
-            <option>PALLET 7240 (PLFRI-072)</option>
-            <option>PALLET 7241 (PLFRI-073)</option>
-            <option>PALLET 7242 (PLFRI-074)</option>
-            <option>PALLET 7244 (PLFRI-076)</option>
-            <option>PALLET 7245 (PLFRI-077)</option>
-            <option>PALLET 7246 (PLFRI-078)</option>
-            <option>PALLET 7247 (PLFRI-082)</option>
-            <option>PALLET 7248 (PLFRI-083)</option>
-            <option>PALLET 7249 (PLFRI-084)</option>
-            <option>PALLET 7250 (PLFRI-085)</option>
-            <option>PALLET 7251 (PLFRI-086)</option>
-            <option>PALLET 7252 (PLFRI-087)</option>
-            <option>PALLET 7260 (PLFRI-088)</option>
-            <option>PALLET 7261 (PLFRI-089)</option>
-            <option>PALLET 7262 (PLFRI-090)</option>
-            <option>PALLET 7263 (PLFRI-091)</option>
-            <option>PALLET 7264 (PLFRI-092)</option>
-            <option>PALLET 7265 (PLFRI-093)</option>
-            <option>PALLET 7266 (PLFRI-094)</option>
-            <option>PALLET 7267 (PLFRI-095)</option>
-            <option>PALLET 7268 (PLFRI-096)</option>
-            <option>PALLET 7269 (PLFRI-097)</option>
-            <option>PALLET 7270 (PLFRI-098)</option>
-            <option>PALLET 7271 (PLFRI-099)</option>
-            <option>PALLET 7272 (PLFRI-100)</option>
-            <option>PALLET 7273 (PLFRI-101)</option>
-            <option>PALLET 7274 (PLFRI-102)</option>
-            <option>PALLET 7275 (PLFRI-103)</option>
-            <option>PALLET 7276 (PLFRI-104)</option>
-            <option>PALLET 7277 (PLFRI-105)</option>
-            <option>PALLET 7280 (PLFRI-108)</option>
-            <option>PALLET 7281 (PLFRI-109)</option>
-            <option>PALLET 7282 (PLFRI-110)</option>
-
-            <option>PALLET 7104 (PLQUE-059)</option>
-            <option>PALLET 7105 (PLQUE-047)</option>
-            <option>PALLET 7108 (PLQUE-043)</option>
-            <option>PALLET 7109 (PLQUE-042)</option>
-            <option>PALLET 7123 (PLQUE-046)</option>
-            <option>PALLET 7127 (PLQUE-062)</option>
-            <option>PALLET 7128 (PLQUE-063)</option>
-            <option>PALLET 7129 (PLQUE-064)</option>
-            <option>PALLET 7131 (PLQUE-079)</option>
-            <option>PALLET 7132 (PLQUE-080)</option>
-            <option>PALLET 7133 (PLQUE-081)</option>
-            <option>PALLET 7134 (PLQUE-082)</option>
-            <option>PALLET 7135 (PLQUE-083)</option>
-            <option>PALLET 7136 (PLQUE-084)</option>
-            <option>PALLET 7137 (PLQUE-085)</option>
-            <option>PALLET 7138 (PLQUE-086)</option>
-            <option>PALLET 7139 (PLQUE-087)</option>
-            <option>PALLET 7140 (PLQUE-088)</option>
-
-            <option>PALLET 7107 (PLQUE-048)</option>
-            <option>PALLET 7113 (PLQUE-041)</option>
-            <option>PALLET 7116 (PLQUE-045)</option>
-            <option>PALLET 7124 (PLQUE-057)</option>
-            <option>PALLET 7141 (PLQUE-089)</option>
-
-            <option>TML-10</option>
-            <option>OUTRO</option>
-          </select>
-        </div>
-
-        <div class="campo">
-          <label for="horimetro">Horímetro</label>
-          <input type="number" id="horimetro" placeholder="Sua resposta">
-        </div>
-
-        <div class="campo">
-          <label for="tipoLavagem">Tipo de Lavagem *</label>
-          <select id="tipoLavagem" required>
-            <option value="">Escolher</option>
-            <option>Completa</option>
-            <option>Compartimento</option>
-            <option>Parcial</option>
-            <option>Motor</option>
-            <option>Cabine</option>
-            <option>Radiador</option>
-            <option>Rodas</option>
-            <option>Parte de inferior</option>
-            <option>Parte superior</option>
-            <option>Lavagem dos Vidros</option>
-            <option>Concha</option>
-            <option>Cilindro</option>
-            <option>Mangueiras</option>
-            <option>Cubo de rodas</option>
-            <option>Tandem</option>
-            <option>Outro</option>
-          </select>
-        </div>
-
-        <div class="campo">
-          <label for="inicio">Início *</label>
-          <input type="time" id="inicio" required>
-        </div>
-
-        <div class="campo">
-          <label for="termino">Término *</label>
-          <input type="time" id="termino" required>
-        </div>
-
-        <div class="campo">
-          <label for="ordem">Ordem *</label>
-          <input type="text" id="ordem" placeholder="Sua resposta" required>
-        </div>
-
-        <div class="campo">
-          <label for="observacao">Observação</label>
-          <textarea id="observacao" placeholder="Sua resposta"></textarea>
-        </div>
-
-        <div class="campo">
-          <button type="submit">ENVIAR</button>
-        </div>
-
-      </form>
-
-      <div id="resultado"></div>
-
-    </div>
-  </div>
-
-  <script>
-
-    // =========================================================
-    // URL DE PRODUÇÃO DO WEBHOOK DO N8N
-    // =========================================================
-
-    const URL_API = "https://n8n-phjm.srv1897202.hstgr.cloud/webhook/ae21136a-b196-4086-8958-6038117ea9e1";
-
-
-    // =========================================================
-    // DATA AUTOMÁTICA
-    // =========================================================
-
-    const campoData = document.getElementById("data");
-
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-    const dia = String(hoje.getDate()).padStart(2, "0");
-
-    campoData.value = `${ano}-${mes}-${dia}`;
-
-
-    // =========================================================
-    // GERA O RELATÓRIO
-    // =========================================================
-
-    function gerarRelatorio() {
-
-      const responsavel =
-        document.getElementById("responsavel").value;
-
-      const turno =
-        document.getElementById("turno").value;
-
-      const dataOriginal =
-        document.getElementById("data").value;
-
-      const maquina =
-        document.getElementById("maquina").value;
-
-      const horimetro =
-        document.getElementById("horimetro").value || "-";
-
-      const tipoLavagem =
-        document.getElementById("tipoLavagem").value;
-
-      const inicio =
-        document.getElementById("inicio").value;
-
-      const termino =
-        document.getElementById("termino").value;
-
-      const ordem =
-        document.getElementById("ordem").value;
-
-      const observacao =
-        document.getElementById("observacao").value || "-";
-
-
-      let data = "-";
-
-      if (dataOriginal) {
-
-        const partes = dataOriginal.split("-");
-
-        data =
-          `${partes[2]}/${partes[1]}/${partes[0]}`;
-      }
-
-
-      const relatorio =
+  const relatorio =
 `*CENTRAL DE LAVAGEM DE EQUIPAMENTOS*
 
 *Responsável BRATEC:* ${responsavel}
@@ -538,171 +45,105 @@
 *Ordem:* ${ordem}
 *Observação:* ${observacao}`;
 
+  document.getElementById("resultado").textContent = relatorio;
+  document.getElementById("resultado").style.display = "block";
 
-      const resultado =
-        document.getElementById("resultado");
+  return {
+    responsavel,
+    turno,
+    data,
+    maquina,
+    horimetro,
+    tipoLavagem,
+    inicio,
+    termino,
+    ordem,
+    observacao,
+    relatorio
+  };
+}
 
-      resultado.textContent = relatorio;
-      resultado.style.display = "block";
+async function enviarFormulario(dados) {
 
+  try {
 
-      return {
-        responsavel,
-        turno,
-        data,
-        maquina,
-        horimetro,
-        tipoLavagem,
-        inicio,
-        termino,
-        ordem,
-        observacao,
-        relatorio
-      };
+    const resposta = await fetch(URL_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(dados)
+    });
+
+    if (!resposta.ok) {
+      throw new Error(`HTTP ${resposta.status}`);
     }
 
+    const texto = await resposta.text();
 
-    // =========================================================
-    // ENVIA PARA O N8N
-    // =========================================================
+    console.log("Resposta do N8N:", texto);
 
-    async function enviarFormulario(dados) {
+    return true;
 
-      const corpo = new URLSearchParams();
+  } catch (erro) {
 
-      corpo.append(
-        "payload",
-        JSON.stringify(dados)
-      );
+    console.error("Erro ao enviar para o N8N:", erro);
 
+    return false;
+  }
+}
 
-      try {
+document
+  .getElementById("formLavagem")
+  .addEventListener("submit", async function(event) {
 
-        const resposta = await fetch(URL_API, {
-          method: "POST",
-          body: corpo
-        });
+    event.preventDefault();
 
+    const camposObrigatorios = this.querySelectorAll("[required]");
 
-        const texto = await resposta.text();
+    let tudoCerto = true;
 
-        console.log(
-          "Resposta do N8N:",
-          texto
-        );
+    camposObrigatorios.forEach(function(campo) {
 
-
-        return resposta.ok;
-
-
-      } catch (erro) {
-
-        console.error(
-          "Erro ao enviar para o N8N:",
-          erro
-        );
-
-        return false;
+      if (!campo.value.trim()) {
+        tudoCerto = false;
+        campo.style.border = "2px solid red";
+      } else {
+        campo.style.border = "";
       }
+
+    });
+
+    if (!tudoCerto) {
+      alert("Preencha todos os campos obrigatórios.");
+      return;
     }
 
+    const botao = this.querySelector("button");
 
-    // =========================================================
-    // ENVIO DO FORMULÁRIO
-    // =========================================================
+    botao.disabled = true;
+    botao.textContent = "ENVIANDO...";
 
-    document
-      .getElementById("formLavagem")
-      .addEventListener(
-        "submit",
-        async function(event) {
+    const dados = gerarRelatorio();
 
-          event.preventDefault();
+    const enviado = await enviarFormulario(dados);
 
+    if (enviado) {
 
-          const camposObrigatorios =
-            this.querySelectorAll("[required]");
+      navigator.clipboard
+        .writeText(dados.relatorio)
+        .catch(() => {});
 
+      alert("Relatório enviado com sucesso para o N8N!");
 
-          let tudoCerto = true;
+    } else {
 
+      alert("Não foi possível enviar o relatório. Verifique o N8N.");
+    }
 
-          camposObrigatorios.forEach(
-            function(campo) {
+    botao.disabled = false;
+    botao.textContent = "ENVIAR";
 
-              if (!campo.value.trim()) {
+  });
 
-                tudoCerto = false;
-
-                campo.style.border =
-                  "2px solid red";
-
-              } else {
-
-                campo.style.border = "";
-              }
-
-            }
-          );
-
-
-          if (!tudoCerto) {
-
-            alert(
-              "Preencha todos os campos obrigatórios."
-            );
-
-            return;
-          }
-
-
-          const botao =
-            this.querySelector("button");
-
-
-          botao.disabled = true;
-
-          botao.textContent =
-            "ENVIANDO...";
-
-
-          const dados =
-            gerarRelatorio();
-
-
-          const enviado =
-            await enviarFormulario(dados);
-
-
-          if (enviado) {
-
-            navigator.clipboard
-              .writeText(dados.relatorio)
-              .catch(() => {});
-
-
-            alert(
-              "Relatório enviado com sucesso para o N8N!"
-            );
-
-
-          } else {
-
-            alert(
-              "Não foi possível enviar o relatório. Verifique o N8N."
-            );
-          }
-
-
-          botao.disabled = false;
-
-          botao.textContent =
-            "ENVIAR";
-
-        }
-      );
-
-  </script>
-
-</body>
-</html>
+</script>
